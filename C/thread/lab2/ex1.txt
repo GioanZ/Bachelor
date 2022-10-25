@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <dirent.h>
+
+#define BUF_SIZE 1024
+
+int main(int narg, char *argv[]){
+
+        char srcFile[100], dstFile[100], buf[BUF_SIZE];
+        int inputFd, outputFd, openFlags;
+	mode_t filePerms;
+	ssize_t numRead;
+
+	if(narg!=3){
+		printf("Errore numero input\n");
+		return 1;
+	}
+
+	strcpy(srcFile, argv[1]);
+	strcpy(dstFile, argv[2]);
+        
+	openFlags= O_CREAT | O_EXCL | O_TRUNC;
+	filePerms= S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;//00700 | 00070 | 00007;
+
+	inputFd=open(srcFile, O_RDONLY);
+	outputFd=open(dstFile, openFlags, filePerms);
+	
+	if(inputFd==-1){
+		printf("file sorgente %s\n", srcFile);
+	}
+	if(outputFd==-1){
+		printf("file destinazione %s\n", dstFile);
+	}
+	
+	while((numRead=read(inputFd, buf, BUF_SIZE)>0)){
+		printf("numRead: %d\n", numRead);
+		if(write(outputFd, buf, numRead)!=numRead){
+			printf("impossibile scrivere l'intero buffer\n");
+		}
+		printf("sono dentro\n");
+		if(numRead==-1)
+			printf("leggo\n");
+		if(close(inputFd)==-1)
+			printf("chiudi input\n");
+		if(close(outputFd)==-1)
+			printf("chiudi output\n");
+        }
+      	printf("\n\nfine\n");
+        return 0;
+}

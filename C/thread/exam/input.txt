@@ -1,0 +1,8 @@
+20 Stefano 12.5 X
+22 Gabriele 13.9 Y
+20 Giulia 7.4 X
+15 Lodovica 17.3 A
+16 Saverio 24.2 Y
+21 Anna 12.3 X
+2 Giorgio 14 X
+21 Anna X
