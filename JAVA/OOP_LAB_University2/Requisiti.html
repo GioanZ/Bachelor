@@ -1,0 +1,134 @@
+<DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href=".css.css" rel="stylesheet" type="text/css">
+
+<title>Wargames</title>
+</head>
+
+<body>
+
+<h1>Wargames</h1>
+
+<p>
+Realizzare un programma grafico che permetta all'utente di giocare una partita a tris (tic-tac-toe) contro un'intelligenza artificiale, simile a quella vista nel film Wargames (1983).
+</p>
+
+<p>
+Il codice che implementa il giocatore artificiale (tramite un variante dell'algortimo del MiniMax chiamato NegaMax) e che memorizza lo stato della partita è già fornito nel package <b>joshua</b>. 
+L'obiettivo di questo laboratiorio è pertanto limitato all'implementazione dell'intefaccia grafica del software.
+</p>
+
+<p>
+Tutte le classi utili alla creazione dell'interfaccia grafica devono appartenere al package <b>gui</b>.
+Non ci sono vincoli sul loro nome e sui metodi da esporre.
+</p>
+
+<h2>R1: Comprensione del codice fornito</h2>
+
+<p>
+L'interazione con il codice fornito deve avvenire attraverso la creazione di un oggetto della classe <b>TicTacToe</b>, implementante i metodi dichiarati nell'intefaccia <b>TicTacToeInterface</b>.
+La classe <b>Move</b> e gli Enum <b>Player</b> e <b>Outcome</b>, specificano gli oggetti attraverso i quali avvengono le interazioni.
+</p>
+
+<p>
+La classe <b>Move</b> rappresenta una mossa come una coppia di coordinate che indentificano la posizione nel reticolo del tris (riga e colonna).
+L'Enum <b>Outcome</b> definisce una serie di costanti rappresentanti i vari esiti di una partita (<b>CPU_WON</b>, <b>USER_WON</b>, <b>DRAW</b>, <b>IN_PROGRESS</b>).
+L'Enum <b>Player</b> definisce le due tipologie di giocatori (<b>USER</b> e <b>CPU</b>).
+</p>
+
+<p>
+Il costuttore della classe <b>TicTacToe</b> richiede come parametro il giocatore che deve effettuare la prima mossa.
+Lo stesso parametro è richiesto dal metodo <b>newGame()</b> che permette di resettare la partita e far iniziare il giocatore specificato.
+</p>
+
+<p>
+E' possibile registrare una mossa dell'utente tramite il metodo <b>userMove()</b> che, fornitie le coordinate nel reticolo, salva la mossa nello stato interno dell'oggetto.
+Il metodo <b>cpuMove()</b>, invece, analizza lo stato della partita e restituisce la mossa effettuata dal giocatore artificiale.
+Entrambi i metodi possono lanciare l'eccezione <b>InvalidMoveException</b> nel caso in cui 
+la posizione fornita per la mossa è al di fuori del reticolo, la cella è occupata, la partita è già terminata, oppure non è il turno di quel giocatore.
+La ragione dell'eccezione è indicata nel suo messaggio.
+</p>
+
+<p>
+Lo stato della partita può essere letto tramite il metodo <b>getOutcome()</b>.
+Il giocatore di turno può essere ottenuto tramite il metodo <b>getCurrentPlayer()</b>.
+</p>
+
+
+
+<h2>R2: Interfaccia grafica: design pattern</h2>
+<p>
+L'interfaccia grafica deve essere sviluppata secondo il pattern Model-View-Controller.
+</p>
+
+<p>
+La classe rappresentante il modello deve utilizzare un'instanza della classe <b>TicTacToe</b> per registrare le mosse dell'utente e richiedere le mosse del calcolatore.
+Questa dev'essere l'unica classe ad interagire direttamente con l'istanza di <b>TicTacToe</b>. Deve esporre metodi utili alla View e al Controller per operare sul modello.
+</p>
+
+<p>
+La classe rappresentante la View deve occuparsi della creazione, inizializzazione e modifica degli elementi a schermo.
+Inoltre deve occuparsi di registrare i listeners necessari a gestire gli eventi generati dagli elementi grafici.
+Può anche intervenire sul Model, ad esempio settanto i valori iniziali.
+</p>
+
+<p>
+Il Controller deve implementare i listeners degli eventi scatenati dall'interfaccia definendo le azioni risultanti.
+Esso può operare cambiamenti al modello e alla View in base alle azioni eseguite dall'utente.
+</p>
+
+<ul class="hint">
+<li>Suggerimento: un modo per far interagire View, Model e Controller è  
+salvare un riferimento al Model all'interno della View e del Controller,
+un riferimento alla View nel Controller
+e un riferimento al Controller nella View.
+</ul>
+
+<h2>R3: Interfaccia grafica: elementi grafici</h2>
+
+
+<p>
+L'intefaccia deve rappresentare il reticolo di gioco che deve essere sempre visibile e aggiornato ad ogni mossa dell'utente e del computer.
+</p>
+
+<p>
+L'utente, durante il suo turno, deve poter selezionare la mossa da compiere.
+Il programma non deve permettere all'utente di effettuare mosse non valide.
+E' di fondamentale importanza che il programma non crashi (per esempio a causa di un'eccezione) se si verificano degli errori.
+In caso di problemi (che non si dovrebbero verificare) la partita deve essere resettata.
+</p>
+
+<p>
+Il programma deve comunicare l'esito della partita, quando essa termina, e permettere all'utente di resettarla manualmente.
+Il reset non deve essere automatico (appena l'ultima mossa è stata fatta) per permettere all'utente di vedere cosè successo.
+</p>
+
+<p>
+Creare una barra dei menù che permetta di cambiare le impostazioni del gioco (es. giocatore iniziale e simbolo utilizzato),
+iniziare una nuova partita, visualizzare informazioni sul programma (es. versione, sviluppatore ecc..).
+</p>
+
+<p>
+Pensare ad ulteriori funzionalità e provare ad aggiungerle. Utilizzare e modificare le classi del package <b>joshua</b> se necessario.
+</p>
+
+<p>
+Di seguito è fornito un esempio di interfaccia grafica.
+</p>
+
+<img src="gui.png" alt="GUI example" heigth="35%" width="35%" class="center">
+
+
+
+<ul class="hint">
+<li>Attenzione: Lo scopo di questo laboratorio è prendere confidenza con lo sviluppo delle interfacce grafiche.
+Implemetare tutte le funzionalità potrebbe essere molto dispendioso in termini di tempo.
+Iniziare da quelle base e continuare fino a quando non siano ben chiari i meccanismi di funzionamento.
+Cercare di provare più elementi grafici possibili (es. layout, messaggi, bottoni, labels, tipi di evento ecc...) per acquisire confidenza.
+</ul>
+
+<footer>Version 2.0 - 2020-04-16</footer>
+</body>
+</html>
