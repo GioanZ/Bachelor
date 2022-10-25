@@ -1,2 +1,0 @@
-Make a form with a text box where you are prompted to enter the code for a course.
-Display all the information contained in the COURSES table related to that course.

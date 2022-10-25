@@ -1,5 +1,0 @@
-Create a form that allows you to enter programming for one of the existing courses. The form must allow the choice, via two drop-down menus, of the scale code of the instructors in charge and the code of the course for which the scheduling is being entered. The menus must propose instructors and courses already in the database. The results page should evaluate the user's correct data entry by verifying:
-- whether all fields have been entered;
-- whether data types are inconsistent (e.g., the day indicated is not one of the days of the week).
-- whether compatibility problems with existing schedules are verified. In particular, check if, on the day and time indicated, the selected room is not busy and if the selected instructor is not busy in another course.
-These checks are to be made through the use of appropriate functions. If the entry fails, the page should notate the error.

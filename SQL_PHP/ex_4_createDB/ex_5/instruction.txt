@@ -1,5 +1,0 @@
-Create a form that requests all the data necessary for entering a new course into the database. The result page must evaluate the user's correct data entry by verifying:
-- whether all fields have been entered;
-- whether the course entered is not already present;
-- whether the data types are inconsistent (e.g., alphanumeric instead of numeric level).
-These checks are to be done through the use of appropriate functions. If the entry ends correctly, a message of correct entry should be displayed, otherwise the error should be notated, as shown in Figures 7 and 8.

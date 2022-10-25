@@ -1,2 +1,0 @@
-Realizzare un form con due caselle di testo dove viene richiesto di inserire il nome ed il cognome di un istruttore.
-Visualizzare il contenuto inviato dal client tramite il form, mostrando la frase “NOME COGNOME è un istruttore” dove NOME e COGNOME corrispondono a quelli inseriti dall’utente.
