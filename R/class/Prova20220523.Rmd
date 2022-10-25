@@ -1,0 +1,189 @@
+---
+title: "Esempio Shiny Avanzato - Redditi 2020"
+output: html_document
+runtime: shiny
+---
+
+### Dataset
+
+SI utilizza un dataset proveniente dagli [Open-Data del Ministero delle Finanze](https://www1.finanze.gov.it/finanze/analisi_stat/public/index.php?opendata=yes)
+
+In particolare i dati relativi ai redditi ei dati IRPEF relativi alle dichiarazioni dei redditi dell'anno fiscale 2020.
+Scaricabile da: <https://www1.finanze.gov.it/finanze/analisi_stat/public/v_4_0_0/contenuti/Redditi_e_principali_variabili_IRPEF_su_base_comunale_CSV_2020.zip?d=1615465800>
+
+```{r setup, echo=FALSE, include=FALSE}
+library(tidyverse)
+library(scales)
+library(readxl)
+
+redditi <- read_csv2("Redditi_e_principali_variabili_IRPEF_su_base_comunale_CSV_2020.zip") %>% 
+           rename(Comune=4, Provincia=5, contribuenti=8, imponibile_n=23, imponibile_eur=24)
+
+redditi <- redditi %>% filter(Regione != "Mancante/errata")
+
+redditi %>% mutate(pro_capite = imponibile_eur / imponibile_n) -> redditi
+```
+
+
+I redditi riportati sono probabilmente il totale di quelli nel comune, possiamo verificare analizzando la correlazione tra il numero di contribuenti e il reddito imponibile.
+
+
+
+```{r}
+#, echo=FALSE}
+## TODO: Mostrare graficamente la correlazione tra contribuenti e reddito imponibile
+library(shiny)
+plotOutput("plotRC", click="clickRC", hover="hoverRC", brush="brushRC")   # ogni click fai, e mi riferisco a "cliclRC" 
+  # hover: quando si passa vicino e non solo per il click
+  # selezio dei dati: brush
+verbatimTextOutput("clickedRC")   # oppure una tabella, ma ora ho solo 1 punto quindi questo
+verbatimTextOutput("hoveredRC")   # un altro spazio per hover
+textOutput("brushedRC")           # prima è per visualizzare il testo come se fosse uno script, ora come se fosse testo scritto normale
+
+
+clicked <- reactiveVal({      # clicked = nome di una funzione creata da me
+  # reactiveVal mi ricalcola tutto appena faccio un evento, ma appena finisce l'evento ritorna come prima => avrei sempre il click vuoto => dataframe vuoto => devo aggionrare il reactiveVal solo quando clicco =>  observeEvent
+  nearPoints(redditi,NULL, maxpoints = 1, threshold = 20) # maxpoints = 1 cioè prendi solo il punto primo più vicino, però il più vicino con un raggio di 20, dato da "threshold"
+  #NULL
+  })
+
+
+# cosa faccio quando faccio click? questo:
+output$clickedRC <- renderPrint({
+  #paste0("Click: contribuenti=", input$clickRC$x, ", reddito=", input$clickRC$y) # stampa le coord di dove clicco (anche se non ci sono punti) => preferisco il punto (il più vicino se non clicco un punto)
+  clicked() %>%          # clicked è una funziona che ho creato io (guarda più su)
+    select(Comune,Provincia,Regione,contribuenti,imponibile_eur)  # mi darebbe tante cose, ma io seleziono solo queste colonne
+  })
+
+
+# PER EVITARE che l'input venga cancellato quando aggiorno il plot (perché modifico e aggiorno il plot allo stesso tempo => problema, ma con questo risolvo)
+observeEvent(input$clickRC,{ # evento da considerare quando succede qualcosa, cioè input$clickRC, ma cosa devo fare quando succede? questo:
+  clicked( nearPoints(redditi,input$clickRC, maxpoints = 1, threshold = 20) )
+  })
+
+
+
+
+
+# quando si passa vicino fai questo:
+hovered <- reactiveVal(nearPoints(redditi,NULL, maxpoints = 1, threshold = 20))
+
+# stessa observe di prima ma per hover, infatti uso hoverRC
+observeEvent(input$hoverRC,{
+  hovered( nearPoints(redditi,input$hoverRC, maxpoints = 1, threshold = 20) )
+  })
+
+
+
+
+
+# il numero di punti selezionati (per non fare come altri 2 prima):
+output$brushedRC <- renderText({                       # il risultato è una stringa => renderText
+  brushed <- brushedPoints(redditi, input$brushRC)     # brushedPoints = punti selez di redditi (CREDO)
+  paste0("Numero punti selezionati: ", nrow(brushed))  # nrow = #di_righe di tutti i punti selezionati => funzione_brushed definita riga prima
+  })
+
+output$hoveredRC <- renderPrint(
+  hovered()
+  )
+
+
+
+
+
+output$plotRC <- renderPlot({                      # il risultato del render mettilo dentro plotRC
+  ggplot(redditi,aes(x=contribuenti,y=imponibile_eur))+
+    geom_point()+
+    geom_point(data=clicked(),color="red") +      # prendi ESCLUSIVAMENTE il punto dato da clicked e colora il punto di red 
+    geom_label(aes(label=Comune),data=hovered()) +   # quando faccio quello che ho scritto dentro hover (=> passo vicino) plottami il nome del comune con un'etichetta (label)
+    ggtitle("Relazione tra Reddito imponibile e Numero di contribuenti",
+            paste("Correlazione:",round(cor(redditi$contribuenti,redditi$imponibile_eur),3)))+
+    scale_y_continuous(labels=scales::label_dollar(prefix="€"))+
+    theme_minimal()
+  })
+
+```
+
+
+Quali sono i redditi medi pro-capite per regione?
+
+```{r redditi medi pro-capite regionali, echo=FALSE}
+## User-Interface
+plotOutput("redditiRegione", hover="rrHover") # genera il plot
+verbatimTextOutput("rr_text")                 # mi da la casella di testo
+
+### SERVER
+dati_rr <- redditi %>% group_by(Regione) %>% 
+  summarize(pro_capite = sum(imponibile_eur) / sum(imponibile_n) ) %>% 
+  arrange(pro_capite) %>% 
+  mutate(Regione = as_factor(Regione)) 
+
+rrHovered <- reactiveVal(dati_rr %>% filter(FALSE))
+observeEvent(input$rrHover,rrHovered( dati_rr[round(input$rrHover$y),] ) )
+
+output$rr_text <- renderPrint({
+  #input$rrHover[c("x","y")]    # i dati degli eventi sono delle liste => seleziono x e y, però non ci capisco nulla quindi uso (la seconda riga dopo):
+  # req( input$rrHover )
+  # dati_rr[round(input$rrHover$y),]    # di dati_rr prendi: round=arrontonda il numero + la barra (orizzontale (=y)) di rrHOver (= quando passo sopra al plot), metto la "," perché voglio la riga e non la colonna <=> il dato è disponibile => uso reg (riga prima)
+  rrHovered()
+  })
+
+output$redditiRegione <- renderPlot({
+  message("Righe overed: ",nrow(hovered), " : ",paste0(names(hovered),collapes=", "))
+  ggplot(dati_rr, aes(y=Regione,x=pro_capite))+     # dati_rr da plottare
+    geom_col() +
+    geom_col(data=rrHovered(),fill="red") +
+    geom_text(aes(label=paste0(round(pro_capite/1000,1),"k€",recycle0 = TRUE)),
+              data=rrHovered(),
+              hjust=1,color="white")+
+    theme_minimal()
+  })
+```
+
+```{r redditi medi pro-capite regionali ERRATO}
+
+## TODO : mostrare i redditi medi pro-capite per regione con un diagramma
+
+redditi %>% group_by(Regione) %>% 
+  summarize(pro_capite = mean(pro_capite) ) %>% ## media delle medie per comune (pesa tutti i comuni allo stesso modo)
+  arrange(pro_capite) %>% 
+  mutate(Regione = as_factor(Regione)) %>% 
+ggplot(aes(y=Regione,x=pro_capite))+
+  geom_col() +
+  geom_text(aes(label=paste0(round(pro_capite/1000,1),"k€")),hjust=1,color="white")
+```
+
+
+```{r}
+#names(redditi)
+
+redditi_distrib <- redditi %>% select(-(1:3),-(7:34),-51) %>% 
+            pivot_longer(starts_with("Reddito complessivo"),names_sep=" - ",names_to = c("Intervallo","Tipo")) %>% 
+            pivot_wider(names_from=Tipo,values_from = value) %>% 
+            rename(Ammontare = `Ammontare in euro`) %>% 
+            mutate(Intervallo = as_factor(Intervallo))
+
+#redditi_distrib %>% group_by(Intervallo) %>% summarize(Frequenza=sum(Frequenza,na.rm=TRUE),Ammontare=sum(Ammontare,na.rm=TRUE))
+redditi_distrib %>% group_by(Intervallo) %>% summarize(across(c("Frequenza","Ammontare"),sum,na.rm=TRUE)) %>% 
+  mutate(freq_prop=Frequenza/sum(Frequenza)) %>% 
+ggplot(aes(y=Intervallo,x=freq_prop))+
+  geom_col(fill="steelblue")+
+  scale_x_continuous(labels=scales::label_percent())+
+  geom_text(aes(label=scales::percent(freq_prop,accuracy=1)),hjust="inward")+
+  theme_bw()
+```
+
+
+```{r, fig.width=14,fig.height=6}
+redditi_distrib %>% filter(Regione!="Mancante/errata") %>% 
+  group_by(Regione,Intervallo) %>% 
+  summarize(across(c("Frequenza","Ammontare"),sum,na.rm=TRUE),.groups="drop_last") %>% 
+  mutate(freq_prop=Frequenza/sum(Frequenza)) %>% 
+  mutate(Intervallo = factor(Intervallo,levels=levels(Intervallo),labels=c("<=0","0-10k","10k-15k","15k-26k","26k-55k","55k-75k","75k-120k",">120k"))) %>% 
+ggplot(aes(y=Intervallo,x=freq_prop))+
+  geom_col(fill="steelblue")+
+  scale_x_continuous(labels=scales::label_percent())+
+  geom_text(aes(label=scales::percent(freq_prop,accuracy=1)),hjust="inward")+
+  facet_wrap(Regione~.,ncol=7)+
+  theme_bw()
+```

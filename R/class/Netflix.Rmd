@@ -1,0 +1,250 @@
+---
+title: "Netflix titles"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Tidyverse (lezione 7 Aprile)
+
+## Dataset 
+
+Dataset originariamente disponibile su [Kaggle](https://www.kaggle.com/shivamb/netflix-shows?select=netflix_titles.csv) distribuito tramite [TidyTuesday](https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-04-20/readme.md).
+
+
+```{r , include=FALSE}
+library(tidyverse)
+
+netflix_titles <- read_csv('netflix_titles.csv')
+```
+
+## Struttura del file:
+
+|variable     |class     |description |
+|:------------|:---------|:-----------|
+|show_id      |character | Unique ID for every Movie / Tv Show |
+|type         |character | Identifier - A Movie or TV Show |
+|title        |character | Title of the Movie / Tv Show |
+|director     |character | Director of the Movie/Show |
+|cast         |character | Actors involved in the movie / show |
+|country      |character | Country where the movie / show was produced |
+|date_added   |character | Date it was added on Netflix |
+|release_year |double    | Actual Release year of the movie / show|
+|rating       |character | TV Rating of the movie / show|
+|duration     |character | Total Duration - in minutes or number of seasons|
+|listed_in    |character | Genre |
+|description  |character | Summary description of the film/show |
+
+
+```{r}
+netflix_titles
+names(netflix_titles)
+```
+
+Distribuzione dei titoli per anno di rilascio
+
+```{r}
+
+table(netflix_titles$release_year)
+
+count(netflix_titles, release_year)
+
+netflix_titles %>% count(release_year)
+
+```
+
+
+Distribuzione per rating
+
+```{r}
+netflix_titles %>% count(rating)
+
+unique(netflix_titles$rating)
+livelli_rating = c("NR","G","TV-G","TV-Y7","TV-Y7-FV","PG","TV-PG","PG-13","TV-14","NC-17","R","TV-MA")
+
+as.factor(netflix_titles$rating)
+factor(netflix_titles$rating,livelli_rating,ordered=TRUE)
+
+netflix_titles <- netflix_titles %>% 
+                  mutate( rating = factor(rating,livelli_rating,ordered=TRUE))
+## OPPURE
+#netflix_titles %>% 
+#  mutate( rating = factor(rating,livelli_rating,ordered=TRUE)) -> netflix_titles
+
+freq_rating <- netflix_titles %>% count(rating)
+
+plot(freq_rating$rating,freq_rating$n)
+
+plot(freq_rating$n,freq_rating$rating)
+
+```
+
+```{r}
+barplot(freq_rating$n, names.arg = freq_rating$rating, 
+        horiz=TRUE, las=1)
+```
+
+Quanti sono i titoli senza un paese?
+
+```{r}
+sum( is.na(netflix_titles$country) )
+```
+
+
+Frequenze per paese
+
+```{r}
+netflix_titles %>% count(country)
+
+netflix_titles %>% 
+  separate(country,into="first_country",sep=",",remove=FALSE) %>% 
+#  select(show_id,first_country,country,title) %>% 
+  count(first_country) %>% 
+  filter( !is.na(first_country) ) %>% 
+#  mutate( perc = paste0( round( n / sum(n) * 100, 1), "%") ) %>% 
+  mutate( perc =  (( n / sum(n) * 100) %>% round(1) %>% paste0("%") ) )  %>% 
+  arrange( - n )
+```
+
+Come è variata la % di titoli provenienti dai vari paesi nel corso degli anni?
+
+```{r}
+
+perc_anno <- netflix_titles %>% 
+  separate(country,into="first_country",sep=",",remove=FALSE) %>% 
+  filter(release_year >= 2000) %>% 
+  count(first_country,release_year) %>% 
+  filter( !is.na(first_country) ) %>%
+  group_by( release_year ) %>% 
+  mutate( perc = round( n / sum(n) * 100, 3) ) %>% 
+  arrange( - perc )
+
+perc_anno
+```
+
+Percentuali per gli USA
+
+```{r}
+perc_anno_usa <- perc_anno %>% 
+  filter(first_country=="United States") %>% 
+  arrange(release_year)
+plot(perc_anno_usa$release_year, perc_anno_usa$perc,t="b")
+```
+
+```{r}
+netflix_titles %>% 
+  separate_rows(listed_in,sep=", ") %>% 
+  count(listed_in) %>% 
+  arrange( -n ) %>% 
+  mutate( perc = round( n / nrow(netflix_titles)*100, 2) )
+```
+
+Solo titoli dei paesi (primo) EU
+
+```{r}
+
+eu_countries = c("Italy","Spain","Portugal","France","Germany","Austria")
+
+eu_titles <- netflix_titles %>% 
+  separate(country,into="first_country",sep=",",remove=FALSE) %>% 
+  filter( first_country %in% eu_countries )
+```
+
+
+
+
+
+
+
+-----
+
+# GGPlot (lezione 11 Aprile)
+
+```{r}
+dati = data.frame(
+  ascissa = 0:20,
+  ordinata = cos((0:20)/10 * pi)
+)
+dati
+
+ggplot(dati, # il dataframe con i dati da utilizzare
+       aes(x=ascissa, y=ordinata))+ # corrispondenza dato --> caratteristica visuale
+  geom_line(color="gray") +
+  geom_point(color="orange",size=4) + ## oggetto geometrico (layer)
+  theme_minimal()
+```
+
+
+Frequenze rating
+
+```{r}
+ggplot(freq_rating,aes(y=rating,x=n))+geom_point()
+
+## VERSIONE BASE:
+
+ggplot(freq_rating,aes(y=rating,x=n,label=n))+
+  geom_col(fill="salmon")+
+  geom_text(aes(label=n),hjust="inward")+
+  theme_bw()
+
+ggplot(netflix_titles,aes(y=rating))+geom_bar() ## calcola le frequenze
+```
+
+SI parte dalla versione base:
+```{r}
+ggplot(freq_rating,aes(y=rating,x=n,label=n))+geom_col()
+```
+
+e si arriva alla versione personalizzata con aggiunta di dettagli
+```{r}
+ggplot(freq_rating,aes(y=rating,x=n,label=n))+
+  geom_col(fill="salmon")+
+  geom_text(aes(label=n),hjust="inward")+
+  theme_bw()
+```
+
+Percentuali per paese e anno
+
+```{r}
+perc_anno %>% 
+  filter(first_country %in% eu_countries ) %>% 
+  ggplot(aes(x=release_year,y=perc,color=first_country))+geom_line()
+```
+
+
+```{r}
+perc_anno %>% 
+  filter(first_country %in% eu_countries ) %>% 
+  ggplot(aes(x=release_year,y=perc,color=first_country,shape=first_country))+
+  geom_line()+
+  geom_point()
+```
+
+```{r}
+perc_anno %>% 
+  filter(first_country == "United States" ) %>% 
+ggplot(aes(x=release_year,y=perc))+geom_line()+geom_point()+
+  geom_label(aes(label=round(perc)),vjust=-0.1)+
+  theme_bw()
+```
+
+
+```{r}
+p <- perc_anno %>% 
+#  filter(first_country %in% eu_countries ) %>% 
+  ggplot(aes(x=release_year,y=perc))
+
+p + geom_point() +ggtitle("Originale")
+p +  geom_point(size=0.1) +ggtitle("Riduzione dimensione")
+p +  geom_point(shape="O") +ggtitle("Forma contornata")
+p +   geom_point(alpha=0.4) +ggtitle("Trasparenza")
+p +  geom_point(position="jitter") +ggtitle("Jittering")
+
+```
+
+<<<<<<< HEAD
+
+=======
+>>>>>>> 289f649bf9033e70c76fbbd0f7b51ecbac012a6b
+
+

@@ -1,0 +1,74 @@
+---
+title: "VIQ - Laboratorio 9"
+date: 2022-06-09
+output: html_document
+runtime: shiny
+---
+
+### Obiettivi
+
+1. Analisi critica
+2. Redesign
+
+### Strumento
+
+RStudio, e le librerie ritenute utili.
+
+---
+
+## Tema d'esame
+
+Si consideri il seguente grafico preso da un [articolo di Vox (del 20 Agosto 2014)](http://www.vox.com/2014/8/20/6040435/als-ice-bucket-challenge-and-why-we-give-to-charity-donate).
+
+![](fundrasing4disease.jpg)
+
+L'articolo commenta il disallineamento tra l'attenzione mediatica con i relativi fondi raccolti pubblicamente e le cause di morte reali.
+
+---
+
+## Analisi
+
+Analizzare il grafico sopra riportato secondo gli aspetti seguenti:
+
+#### Question: c'è una domanda (o più di una) a cui la visualizzazione risponde? Scriverla con parole proprie.
+
+...
+
+#### Data: i dati riportati sono validi e supportano la domanda? La qualità dei dati è appropriata? Indicare le caratteristiche non adeguate.
+
+Caratteristica      | Valutazione dell'adequatezza
+-------------------:|-------------------------------------------------
+Accuracy            |
+Completeness        | 
+Consistency         | 
+Currency            | 
+Credibility         | 
+Understandability   | 
+Precision           | 
+
+
+
+#### Visual Proportionality: le misure sono riportate in maniera uniformemente proporzionale?
+
+...
+
+#### Visual Utility: tutti gli elementi presenti nel grafico trasmettono informazioni utili?
+
+...
+
+
+#### Visual Clarity: i dati del grafico sono chiaramente identificabili e comprensibili (opportunamente descritti)?
+
+...
+
+## Design
+
+Riprogettare la visualizzazione in modo da risolvere i problemi evidenziati nell'analisi.
+
+1. Indicare le linee generali del redesign
+2. Implementare la visualizzazione
+
+```{r import delle librerie,include=FALSE}
+
+```
+

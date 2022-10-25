@@ -1,0 +1,124 @@
+---
+title: "VIQ - Laboratorio 7"
+#author: "Marco Torchiano"
+date: '2022-05-19'
+output: html_document
+runtime: shiny
+---
+
+### Obiettivo
+
+- Applicare principi e tecniche base per la costruzione di app Shiny
+
+### Strumento
+
+-  R Studio 
+
+### Dataset
+
+*Dataset del Laboratorio 1, Esercizio 1* :
+
+Classifica Marcatori Serie A, Campionato 2020/21, 27ª giornata
+
+-   URL: <http://softeng.polito.it/courses/VIQ/datasets/Marcatori2021.csv>
+-   Scaricata a partire dai dati pubblicati da [La Gazzetta dello Sport](https://www.gazzetta.it/calcio/serie-a/marcatori/).
+
+**Istruzioni per creare un'app in un file R-Markdown**
+
+- Utilizzare il menù *File* e sceglie *New File* e quindi *R Markdown...* 
+- Nella finestra di scelta, indicare il nome e selezionare *Document* e come formato *HTML*
+- Questo documento è un esempio di App (quindi è anche possibile salvarlo con altro nome...)
+- Per eseguire la App shiny utilizzare il pulsante ![Run Document](RunDocument.jpg)
+  (non eseguite direttamente i chunk perchè in questo modo non viene avviato il server)
+
+---
+
+## App di esempio
+
+Figure di Lissajous (semplificate). Curve descritte dalle seguenti equazioni:
+
+$$\begin{cases}
+x = cos(2 \pi \cdot x)\\
+y = sin(m \cdot 2 \pi \cdot x)\\
+\end{cases}
+\quad, x \in [0,1]
+$$
+
+```{r ui}
+## This is the portion of code that generates the UI
+## It is run only once at App startup
+library(shiny)
+plotOutput("figura")
+sliderInput("numero","Numero di punti",value=20,min=10,max=300)
+sliderInput("molteplicita","Moteplicità (m)",value=2,min=1,max=10)
+```
+
+```{r sever}
+## This is the server (back-end) part that is run by Shiny to update the UI (front-end)
+## The expression are evaluated on-demand, when required (according dependency graph)
+library(ggplot2)
+dati <- reactive(data.frame(x=cos((0:input$numero)*2*pi/input$numero),
+                            y=sin((0:input$numero)*input$molteplicita*2*pi/input$numero)))
+output$figura <- renderPlot( {
+  ggplot(dati(),aes(x=x,y=y))+
+  geom_path()+
+  ggtitle("Lissajous")+
+  theme_bw()
+})
+```
+
+--- 
+
+### Esercizio 1: statistiche generali
+
+1.  Calcolare e mostrare servendosi di `textOutput()` e/o `verbatimTextOutput()` gli indici sommari della distribuzione dei gol:
+    1.   Tendenza centrale: media, mediana, midrange, moda
+    2.   Dispersione: deviazione standard, MAD, IQR, range
+    
+    (Si veda *Lab1, Es1, Task2*)
+
+
+2.  Aggiungere alla pagina la tabella di distribuzione delle frequenze per il numero di gol (inserire il numero di gol come etichetta di riga) utilizzando la funzione *TableOutput()*
+    
+    (Si veda *Lab1, Es1, Task3*)
+        
+3. Immettere un campo di input legato alla tabella statica, in cui inserire il numero massimo di gol da visualizzare utilizzando `numericInput()` e fare in modo che la tabella si aggiorni automaticamente 
+
+4. Aggiungere un pulsante (tramite `actionButton()`) e fare in modo che la tabella si aggiorni solo al click sul pulsante (usare `eventReactive()`)
+
+5.  Aggiungere una nuova tabella dinamica (utilizzando la funzione `dataTableOutput()`) ed inserire un un campo di input legato ad essa, in cui inserire un range di gol da visualizzare (utilizzando `sliderInput()`) e fare in modo che la tabella si aggiorni automaticamente quando viene modificato. Gli estremi dello slider possono essere fissati staticamente (min e max dei dati)
+
+7. Disegnare (su carta) il reactive graph dell'app realizzata
+
+--- 
+
+### Esercizio 2: marcatori
+
+
+1. Prevedere l'upload di un file CSV (analogo a `Marcatori2021.csv`):
+
+   -  Utilizzare il metodo `fileInput()` per consentire l'upload, es.: `fileInput("file", "Load csv file Marcatori Serie A", accept = c(".csv"))`
+   -  Definire un dataframe *df* come espressione *reactive*, es.:
+   
+      ```
+      df <- reactive({
+        req(input$file)
+        read.csv(input$file$datapath, header = TRUE, sep=",")})
+      ```
+      
+1. Costruire una tabella di distribuzione delle frequenze che riporti, per ciascuna squadra, il numero di giocatori che hanno segnato almeno un gol per quella squadra. La tabella deve essere ordinata per numero di marcatori *decrescente* . Utilizzare esclusivamente `tableOutput()`. (Si veda *Lab1, Es1, Task4*)
+
+2. Permettere di selezionare il ruolo (valori possibili: *Tutti, Difensore, Centrocampista, Attaccante*) e fare in modo che la tabella si aggiorni mostrando solo il numerdo di giocatori che ricoprono quel ruolo.
+   - È possibile utilizzare il metodo  `selectInput()`
+   - Per verificare i risultati, modificare la tabella Pivot del file `Lab1_1_sol.xlsx` (tab `Freq.squadre`) in modo che venga tenuto in conto nelle righe anche il ruolo
+   - La tabella, ad ogni aggiornamento, deve continuare as essere ordinata per numero di marcatori *decrescente* 
+
+3. Modificare la possibilità di scelta consentendo la scelta multipla con l'opzione `multiple=TRUE` 
+e fare in modo che la tabella si aggiorni mostrando solo le squadre selezionate
+
+4. Sostituire alla scelta multipla con `selectInput()` checkbox con `checkboxGroupInput()`
+
+5. Aggiungere un grafico che rappresenta la tabella di distribuzione dei marcatori per squadra (ad es. grafico a barre), facendo in modo che il grafico si aggiorni automaticamente con la scelta dei ruoli (come la tabella)
+
+---
+
