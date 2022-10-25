@@ -1,0 +1,2 @@
+Build a form to select an instructor's last name (from a drop-down menu generated from the contents of the database table) and a day (from a drop-down menu that contains pressed values, independent of the contents of the database).
+Pass the selected data to a php page that can display all activities held by the instructor on the indicated day. For each activity display day, start time and ne, name, type and level. Sort the activities in ascending order by level and alphabetically by name.

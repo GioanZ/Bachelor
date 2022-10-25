@@ -1,0 +1,1 @@
+Make a form with a drop-down menu to select the code of one of the courses available in the database. Display all the information contained in the COURSES table related to that course.
