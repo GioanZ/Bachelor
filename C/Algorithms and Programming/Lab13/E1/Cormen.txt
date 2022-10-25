@@ -1,0 +1,19 @@
+9
+camicia
+cravatta
+giacca
+cintura
+orologio
+slip
+scarpe
+pantaloni
+calzini
+camicia cravatta 1
+cravatta giacca 2
+camicia cintura 3
+cintura giacca 4
+slip scarpe 5
+slip pantaloni 6
+calzini scarpe 7 
+pantaloni scarpe 8
+pantaloni cintura 9
