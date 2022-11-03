@@ -39,7 +39,7 @@ The static factory method **fromFile()** creates an object of class _Region_ usi
 
 **HTML:**
 
-    <table style="float:none;font-family:sans-serif;">
+   <table style="float:none;font-family:sans-serif;">
       <tr>
         <th>#</th>
         <th>Columns</th>
@@ -92,7 +92,7 @@ The static factory method **fromFile()** creates an object of class _Region_ usi
         <td></td>
         <td>&#10003;</td>
       </tr>
-    </table>
+   </table>
     
 **HTML.**
 
