@@ -41,15 +41,6 @@ Le informazioni relative ai rifugi della regione sono memorizzati in un file con
 
 **HTML:**
 
-  <style>
-    td {
-      text-align: center;
-    }
-
-    th {
-      text-align: left;
-    }
-  </style>
   <table style="float:none;font-family:sans-serif;">
     <tr>
       <th>#</th>
@@ -104,6 +95,7 @@ Le informazioni relative ai rifugi della regione sono memorizzati in un file con
       <td>&#10003;</td>
     </tr>
   </table>
+  
 **HTML.**
 
 **Attenzione**: il file contiene una riga per ogni rifugio, quindi le informazioni relative ai comuni possono essere replicate più volte.
