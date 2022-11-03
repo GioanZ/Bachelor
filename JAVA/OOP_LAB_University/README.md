@@ -1,87 +1,87 @@
-# Gestione Ateneo
+# University Management System
 
-Progettare ed implementare un programma che possa gestire corsi, docenti e studenti di un ateneo. Tutte le classi devono appartenere al pacakge university. 
-Il programma interagisce con i propri clienti attraverso la classe di facciata University. 
+Design and implement a program to manage university courses, teachers, and students.
 
-## R1. Ateneo
+All the classes must belong to the package university. 
 
-La classe principale è University che riceve, come parametro del costruttore, il nome dell'ateneo. 
 
-Il nome dell'ateneo è leggibile tramite il metodo getter getName(). 
+## R1. University
 
-È possibile definire il nome del rettore di un ateneo tramite il metodo setRector() che riceve come parametri nome e cognome del rettore. 
+The user interface (not part of this assignment) interacts through the class University, whose constructor accepts as argument the name of the university. 
 
-Il metodo getter getRector() restituisce nome e cognome del rettore concatenati e separati da uno spazio (" "). 
+The name of the university can be retrieved through method getName().
 
-## R2. Studenti
+It is possible to assign the name of the Rector by means of the method setRector() that accepts as arguments the first and last name of the Rector. 
 
-È possibile inserire le informazioni relative ad un nuovo studente tramite il metodo enroll() della classe University, che riceve come parametri il nome ed il cognome dello studente; il metodo restituisce il numero di matricola che è stato assegnato allo studente.
- I numeri di matricola vengono assegnati, in maniera progressiva per ciascun ateneo a partire dal numero 10000. Quindi il primi studente iscritto ad ogni ateneo avrÃ  matricola 10000 
+The method getRector() returns the first and last name of the Rector concatenated and separated by a blank space (" "). 
 
-Per ottenere le informazioni relative ad uno studente si utilizza il metodo student() che riceve come parametro la matricola e restituisce una stringa composta da numero di matricola, nome e cognome separati da spazi, es. "10000 Giuseppe Verdi". 
+## R2. Students
 
-💡Si assuma che ciascun ateneo non possa contenere più di 1000 studenti. 
+It is possible to enter information concerning a new student thought the method enroll() of class University, that accepts as arguments first and last name of the student; the method returns the ID number that has been assigned to the student. ID numbers are are assigned progressively in each university starting from number 10000. 
 
-## R3. Insegnamenti
+To retrieve the information about a student we can use the method student() that accepts as an argument the ID number and returns a string made up of ID, first, and last name separated by blank spaces, e.g. "10000 Donald Duck". 
 
-Per definire un nuovo insegnamento si utilizza il metodo activate() che riceve come parametri il titolo del corso e il nome del docente titolare. Il metodo restituisce un intero che corrisponde al codice del corso. I codici vengono assegnati progressivamente a partire da 10. 
+💡We can assume that each university has at most 1000 enrolled students. 
 
-Per conoscere le informazioni relative ad un corso si usa il metodo course() che riceve come parametro il codice del corso e resituisce una stringa contenente codice, titolo e titolare del corso, separati da virgole, es. "10,Programmazione a Oggetti,James Gosling". 
+## R3. Courses
 
-💡Si assuma che ciascun ateneo non possa attivare più di 50 insegnamenti. 
+To define a new course we can use the method activate() that accepts as arguments the title of the course and the name of the responsible teacher. The method returns an integer that corresponds to the course code. Course codes are assigned progressively starting from 10. 
 
-## R4. Iscritti agli insegnamenti
+To retrieve the information about a course we can use the method course() that accepts the course's code and returns a string containing code, title, and teacher separated by commas, e.g., "10,Object Oriented Programming,James Gosling". 
 
-Gli studenti possono essere iscritti agli insegnamenti tramite il metodo register() che riceve come parametro la matricola dello studente ed il codice dell'insegnamento. 
+💡We can safely assume that any university offers no more than 50 courses. 
 
-Per ottenere l'elenco degli iscritti ad un insegnamento è disponibile il metodo listAttendees() che riceve come parametro il codice dell'insegnamento e restituisce una stringa contenente l'elenco degli studenti iscritti. 
+## R4. Course attendance
 
-Gli studenti compaiono uno per riga (le righe sono terminate da un a-capo "\n") secondo il formato descritto al punto R2. 
+Students that wish to attend a course must be registered through the method register() that accepts as arguments the ID of the student and the course's code. 
 
-Data la matricola di uno studente, tramite il metodo studyPlan(), è possibile conoscere l'elenco degli insegnamenti a cui è iscritto, gli insegnamenti sono descritti come al punto precedente. 
+To get the list of students attending a course we can use the method listAttendees() that accepts the code of the course and returns a string containing the list of attendees.
+ The students appear one per row (rows are terminated by a new-line character '\n') and each row is formatted as describe in requirement R2. 
 
-💡Si assuma che ciascuno studente non possa essere iscritto a più di 25 insegnamenti e che un insegnamento non possa avere più di 100 iscritti. 
+Given the ID of a student, it is possible to get the list of courses she is attending through the method studyPlan(). The courses are described one per row and formatted as described in requirement R3. 
 
-# Gestione Ateneo - Estensione
-Estendere all'interno della classe UniversityExtle funzionalità già implementate nella classe University. 
+💡We can safely assume that no course has more than 100 attendees and that each student can attend no more that 25 distinct courses. 
 
-La nuova classe UniversityExt estende la classe University. 
+# University Management System - Extended
 
-## R5. Esami
+Extend, inside class UniversityExt the functions already implemented in class University. 
 
-Gli studenti possono sostenere gli esami degli insegnamenti a cui sono iscritti. Il voto di un esame può essere registrato tramite il metodo exam() che riceve come parametri l'ID dello studente, il codice del corso ed il voto (un intero in 0-30). 
+The class UniversityExt extends class University. 
 
-per ottenere la media dei voti di uno studente si usa il metodo studentAvg() che accetta come parametro l'ID dello studente. Se lo studente ha sostenuto almeno un esame il metodo restituisce uan stringa con il seguente formato "Student STUDENT_ID : AVG_GRADE". Altrimenti restituisce "Student STUDENT_ID hasn't taken any exams". 
+## R5. Exams
 
-È possibile otterene la media dei voti di tutti gli studenti che hanno sostenuto l'esame di un dato insegnamento tramite il metodo courseAvg(), che accetta come parametro il codice del corso. Il formato è il seguente "The average for the course COURSE_TITLE is: COURSE_AVG", se almeno uno studente ha sostenuto l'esame per l'insegnamento dato. Altrimenti il metodo restituisce "No student has taken the exam in COURSE_TITLE". 
+Students can take the exams for the courses in which they have been enrolled. The grade for an exam can be registered through the method exam() that accepts as arguments the ID of the student, course code and a grade (integer 0-30). 
 
-💡Si può assumere che se uno studente sostiene un esame sia stato precedentemente iscritto all'insegnamento. 
+To get the average grade for a student, the method studentAvg() is used. It accepts as argument the ID of the student. If the student took at least one exam it returns a String of the following format "Student STUDENT_ID : AVG_GRADE". Otherwise, it returns "Student STUDENT_ID hasn't taken any exams". 
 
-## R6. Premi per gli studenti
+It is possible to get the average grades of all students that took the exam for a given course, method courseAvg() accepting as argument the course code can be used for this purpose. The format is the following: "The average for the course COURSE_TITLE is: COURSE_AVG", if at least one student took the exam for that course. If this is not the case, the method should return "No student has taken the exam in COURSE_TITLE". 
 
-L'ateneo ha deciso di premiare i migliori studenti per il loro lavoro. Il metodo topThreeStudents() è utilizzato per reperire le informazioni che aiutino la commissione che dovrà prendere la decisione. 
+💡It can be safely assumed that if a student takes an exam, it has been previously enrolled to the corresponding course. 
 
-Il punteggio degli studenti è valutato sulla base della media degli esami sostenuti. Per tenere in considerazione anche il numero di esami sostenuti e non solo la media, viene assegnato un bonus aggiuntivo alla media: il numero degli esami sostenuti divviso il numero di insegnamenti a cui è iscritto lo studente, moltiplicato per 10 viene sommato all media. 
+## R6. Student award
 
-Il metodo restituisce una una stringa con le informazioni relative ai tre studenti con il punteggio più alto. Gli studenti vengono riportati uno per riga (le righe sono terminate dal caratteredi fine linea '\n') e ciascuna linea è formattata come segue: "STUDENT_FIRSTNAME STUDENT_LASTNAME : SCORE". 
+The university has decided to award the best students for their hard-work and effort. The method topThreeStudents() is used to retrieve information for helping the committee to award the price(s). 
 
-💡Si assuma che non ci siano parimerito. 
+The students' score is evaluated as the average grade of the exams they've taken. To take into account the number of exams taken and not only the grades, special bonus is assigned on top of the average grade: the number of taken exams divided by the number of courses the student is enrolled to, multiplied by 10 is added. 
+
+The method returns a string with the information about the three students with the highest score. The students appear one per row (rows are terminated by a new-line character '\n') and each one of them is formatted as: "STUDENT_FIRSTNAME STUDENT_LASTNAME : SCORE". 
+
+💡Assume that there are no ties. 
 
 ## R7. Logger
 
-Si aggiunga un log per le operazioni eseguite tramite la classe di facciata UniversityExt. Tali operazioni includono: 
-* iscrizione di uno studente: es. "New student enrolled: 10000, Mario Rossi"
+Add logging of operations performed through the UniversityExt facade class. Such operations include: 
+* enrolling a new student: "New student enrolled: 10000, Mario Rossi"
 
-* attivazione di un nuovo insegnamento: es. "New course activated: 11, Object Oriented Programming James Gosling"
+* activating a new course "New course activated: 11, Object Oriented Programming James Gosling"
 
-* iscrizione di uno studente ad un insegnamento: es. "Student 10004 signed up for course 11"
+* a student signing up for a course "Student 10004 signed up for course 11"
 
-* assegnazione del voto per un esame: es. "Student 10001 took an exam in course 12 with grade 27"
+* a student taking an exam "Student 10001 took an exam in course 12 with grade 27"
 
 
+💡to perform logging a logger object of class java.util.logging.Logger is available within class UniversityExt; 
 
-💡per eseguire il logging, è disponibile un oggetto logger di classe java.util.logging.Logger all'interno della classe UniversityExt; 
+💡use the info() method of object logger to generate the logging messages; 
 
-💡si usi il metodo info() dell'oggetto logger per generare i messaggi; 
-
-💡si noti che per default il logger stampa i messaggi sulla console. 
+💡please note that by default the messages will be printed to the console. 
