@@ -27,6 +27,7 @@ La classe rappresentante il modello deve utilizzare un'instanza della classe Tic
 La classe rappresentante la View deve occuparsi della creazione, inizializzazione e modifica degli elementi a schermo. Inoltre deve occuparsi di registrare i listeners necessari a gestire gli eventi generati dagli elementi grafici. Può anche intervenire sul Model, ad esempio settanto i valori iniziali. 
 
 Il Controller deve implementare i listeners degli eventi scatenati dall'interfaccia definendo le azioni risultanti. Esso può operare cambiamenti al modello e alla View in base alle azioni eseguite dall'utente. 
+
 💡Suggerimento: un modo per far interagire View, Model e Controller è salvare un riferimento al Model all'interno della View e del Controller, un riferimento alla View nel Controller e un riferimento al Controller nella View. 
 
 ## R3: Interfaccia grafica: elementi grafici
