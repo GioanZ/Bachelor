@@ -41,57 +41,71 @@ The static factory method **fromFile()** creates an object of class _Region_ usi
 
 td { text-align: center; } th { text-align: left; }
 
-#
+**HTML:**
+    <style>
+      td {
+        text-align: center;
+      }
 
-Columns
-
-Information
-
-**Municipality**
-
-**MountainHut**
-
-0
-
-_Province_
-
-✓
-
-1
-
-_Municipality_
-
-✓
-
-2
-
-_MunicipalityAltitude_
-
-✓
-
-3
-
-_Name_
-
-✓
-
-4
-
-_Altitude_
-
-✓
-
-5
-
-_Category_
-
-✓
-
-6
-
-_BedsNumber_
-
-✓
+      th {
+        text-align: left;
+      }
+    </style>
+    <table style="float:none;font-family:sans-serif;">
+      <tr>
+        <th>#</th>
+        <th>Columns</th>
+        <th colspan="4">Information</th>
+      <tr>
+        <th></th>
+        <th></th>
+        <th><b>Municipality</b></th>
+        <th><b>MountainHut</b></th>
+      </tr>
+      <tr>
+        <td>0</td>
+        <th><i>Province</i></th>
+        <td>&#10003;</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <th><i>Municipality</i></th>
+        <td>&#10003;</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <th><i>MunicipalityAltitude</i></th>
+        <td>&#10003;</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <th><i>Name</i></th>
+        <td></td>
+        <td>&#10003;</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <th><i>Altitude</i></th>
+        <td></td>
+        <td>&#10003;</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <th><i>Category</i></th>
+        <td></td>
+        <td>&#10003;</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <th><i>BedsNumber</i></th>
+        <td></td>
+        <td>&#10003;</td>
+      </tr>
+    </table>
+**HTML.**
 
 **Note**: the file contains a line for each hut, therefore the information about municipalities may be duplicated.
 
