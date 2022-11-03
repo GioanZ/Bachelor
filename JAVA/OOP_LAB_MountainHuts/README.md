@@ -1,5 +1,3 @@
-  Lab - Mountain huts  
-
 Mountain huts
 =============
 
