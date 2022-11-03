@@ -38,6 +38,7 @@ R3 - Input from CSV
 The static factory method **fromFile()** creates an object of class _Region_ using the information stored inside a file whose name is passed as an argument. In more details, the method should populate the region with the municipalities and the huts described in a [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) file, structured as follows:
 
 **HTML:**
+
     <style>
       td {
         text-align: center;
