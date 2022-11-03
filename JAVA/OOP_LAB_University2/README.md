@@ -42,5 +42,7 @@ Creare una barra dei menù che permetta di cambiare le impostazioni del gioco (e
 Pensare ad ulteriori funzionalità e provare ad aggiungerle. Utilizzare e modificare le classi del package joshua se necessario. 
 
 Di seguito è fornito un esempio di interfaccia grafica. 
+
 *apripre gui.png*
+
 💡Attenzione: Lo scopo di questo laboratorio è prendere confidenza con lo sviluppo delle interfacce grafiche. Implemetare tutte le funzionalità potrebbe essere molto dispendioso in termini di tempo. Iniziare da quelle base e continuare fino a quando non siano ben chiari i meccanismi di funzionamento. Cercare di provare più elementi grafici possibili (es. layout, messaggi, bottoni, labels, tipi di evento ecc...) per acquisire confidenza. 
