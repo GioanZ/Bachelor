@@ -39,15 +39,6 @@ The static factory method **fromFile()** creates an object of class _Region_ usi
 
 **HTML:**
 
-    <style>
-      td {
-        text-align: center;
-      }
-
-      th {
-        text-align: left;
-      }
-    </style>
     <table style="float:none;font-family:sans-serif;">
       <tr>
         <th>#</th>
@@ -102,6 +93,7 @@ The static factory method **fromFile()** creates an object of class _Region_ usi
         <td>&#10003;</td>
       </tr>
     </table>
+    
 **HTML.**
 
 **Note**: the file contains a line for each hut, therefore the information about municipalities may be duplicated.
