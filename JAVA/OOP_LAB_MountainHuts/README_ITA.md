@@ -39,7 +39,6 @@ R3 - Lettura da CSV
 
 Le informazioni relative ai rifugi della regione sono memorizzati in un file con codifica [CSV](https://it.wikipedia.org/wiki/Comma-separated_values) che è strutturato in base alle seguenti colonne che contengono informazioni relative a comuni e rifugi di montagna:
 
-**HTML:**
 
   <table style="float:none;font-family:sans-serif;">
     <tr>
@@ -96,7 +95,6 @@ Le informazioni relative ai rifugi della regione sono memorizzati in un file con
     </tr>
   </table>
   
-**HTML.**
 
 **Attenzione**: il file contiene una riga per ogni rifugio, quindi le informazioni relative ai comuni possono essere replicate più volte.
 
