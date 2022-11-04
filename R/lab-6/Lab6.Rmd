@@ -1,0 +1,576 @@
+---
+title: "VIQ - Laboratorio 6"
+date: '2022-05-12'
+output:
+  html_document:
+    df_print: paged
+---
+
+### Obiettivi
+
+1. Creare mappe coropletiche
+2. Combinare dati diversi
+
+### Strumento
+
+RStudio, in particolare le librerie presenti nel tidyverse (ggplot2), le librerie sf e patchwork.
+
+```{r import delle librerie,include=FALSE}
+library(tidyverse)
+library(sf)
+library(readxl)
+library(patchwork)
+```
+
+### Dataset
+
+- Shapefile dei confini amministrativi italiani, dalla pagina: <https://www.istat.it/it/archivio/222527>
+   - Shapefile anno 2020: <https://www.istat.it/storage/cartografia/confini_amministrativi/generalizzati/Limiti01012020_g.zip>
+   - Zip scaricato e da espandere nella cartella corrente
+- Dati popolazione residente 1 Gennaio 2021 fonte ISTAT, dalla pagina:  <http://dati.istat.it/Index.aspx?QueryId=18460>
+  - File scaricato e salvato nel file CSV (`DCIS_POPRES1.csv`)
+- Dati dashboard ISS su diffusione COVID-19, dalla pagina:  <https://www.epicentro.iss.it/coronavirus/sars-cov-2-dashboard>
+  - In particolare: <https://www.epicentro.iss.it/coronavirus/open-data/covid_19-iss.xlsx>
+
+
+```{r download and expand data files, include=FALSE}
+shapeurl <- "https://www.istat.it/storage/cartografia/confini_amministrativi/generalizzati/Limiti01012021_g.zip"
+shapezip <- sub(".*/","",shapeurl)
+shapedir <- sub("\\.zip","",shapezip)
+if(! file.exists(shapezip)){
+  download.file(shapeurl,shapezip,mode="wb")
+}
+if(! dir.exists("Limiti01012021_g")){
+  unzip(shapezip)
+}
+
+shapes_prov <- "Limiti01012021_g/ProvCM01012021_g/ProvCM01012021_g_WGS84.shp"
+shapes_regioni <- "Limiti01012021_g/Reg01012021_g/Reg01012021_g_WGS84.shp"
+
+
+## Non c'è un link diretto: occorre aprire la pagina
+## http://dati.istat.it/Index.aspx?QueryId=18460
+## cliccare su Esporta, selezionare File CSV e poi
+## cliccare sul pulsante scaricamento
+##
+## File già scaricato e disponibile
+popfile <- "DCIS_POPRES2021.csv"
+
+urliss <- "https://www.epicentro.iss.it/coronavirus/open-data/covid_19-iss.xlsx"
+fileiss <- sub(".*/","",urliss)
+if( ! file.exists(fileiss) ){
+  download.file(urliss,fileiss,mode="wb")
+}
+```
+
+## Parte 1: Mappe e dati geografici
+
+
+### Visualizzare mappa con i confini provinciali
+
+Utilizzando gli shapefile relativi ai confini amministrativi delle province, dal sito ISTAT: <https://www.istat.it/it/archivio/222527>
+
+- leggere e visualizzare i confini delle province
+
+
+```{r, fig.width=6,fig.height=8}
+### DA COMPLETARE
+
+prov <- read_sf(shapes_prov)
+
+ggplot(prov)+
+  geom_sf()+      # necessario per plottare una mappa
+  theme_minimal() # tema minimalista senza annotazioni di sfondo
+
+```
+
+- visualizzare all'interno di ciascuna provincia la sigla (`SIGLA`)
+  - *Suggerimento:* utilizzare la funzione `geom_sf_text()` per inserire testo nella sf
+
+```{r,fig.width=6,fig.height=8}
+## DA COMPLETARE
+
+ggplot(prov)+
+  geom_sf() +
+  geom_sf_label(aes(label=SIGLA),size=2,alpha=0.5,label.size=0)+  # size = dim della etichetta; alpha = dimensione sfondo etichetta; label.size = dimensione cronice etichetta
+  labs(x="",y="")+  # dai un nome agli assi x e y, in questo caso nessuno => li tolgo così
+  theme_minimal()
+
+```
+
+- aggiungere un colore di riempimento che corrisponda al tipo di entità territoriale (`TIPO_UTS`)
+  - provara a variare lo schema di colori (es. `scale_fill_brewer()`)
+
+```{r,fig.width=6,fig.height=5}
+## DA COMPLETARE
+
+ggplot(prov,aes(fill=TIPO_UTS))+    # fill è per colorare l'interno (dai un colore diverso per ogni tipo diverso di TIPO_UTS), colour (al suo posto) è per il contorno
+  geom_sf() +
+  geom_sf_text(aes(label=SIGLA),size=2)+
+  scale_fill_brewer(type="qual",palette=3)+ # sequenza di colori, di tipo=qualitativo, tavolozza 3
+  labs(x="",y="")+
+  theme_minimal()
+
+```
+
+
+### Caricare e "arrangiare" i dati di popolazione
+
+Si usa il file `DCIS_POPRES2021.csv` scaricato dalla base dati ISTAT.
+
+---
+
+Il file contiene il valore di popolazione (`Value`) per diverse aggregazioni:
+
+- diverse entità territoriali (indicate da `ITTER107`)
+  - `IT` intero territorio nazionale
+  - `ITx` territori (es. Nord-ovest)
+  - `ITx#` regioni e province autonome
+  - `ITx#y` province,
+- genere (`Sesso`)
+  - `maschi`
+  - `femmine`
+  - `totale`
+- diversi stati civili (`Stato civile`)
+  - vari oltre a `totale`
+- diverse età (`Età`)
+  - `0 anni`
+  - ...
+  - `100 anni e più`
+  - `totale`
+  
+--- 
+
+
+- leggere i dati relativi alla popolazione (e mostrare il dataframe)
+  - *Suggerimento:* usare il metodo `read_csv()` con solo il nome del file, viene generato il codice
+    relativo ai tipi delle colonne che può essere usato come valore per il parametro `col_types`
+  - per riferirsi a nomi di colonne contenenti spazi occorre racchiuderli tra `
+
+```{r}
+## DA COMPLETARE
+
+popolazione = read_csv(popfile,col_types = cols(
+  ITTER107 = "character",
+  Territorio = "character",
+  TIPO_DATO15 = "character",
+  `Tipo di indicatore demografico` = "character",
+  SEXISTAT1 = "integer",
+  Sesso = "factor",
+  ETA1 = "factor",
+  Età = "factor",
+  STATCIV2 = "integer",
+  `Stato civile` = "factor",
+  TIME = "integer",
+  `Seleziona periodo` = "double",
+  Value = "integer",
+  `Flag Codes` = "character",
+  Flags = "character"
+)) %>% 
+  select(-TIPO_DATO15,-`Tipo di indicatore demografico`,-TIME,-`Seleziona periodo`,-`Flag Codes`,-Flags)
+
+popolazione
+
+```
+
+- selezionare la popolazione totale a livello di provincia (e mostrare il dataframe)
+  - *Suggerimento:* per selezionare le provinci è possibile usare `nchar(ITTER107)==5`
+  - *Suggerimento:* selezionare il totale per età, sesso, e stato civile
+
+```{r}
+## DA COMPLETARE
+
+pop_prov <- popolazione %>% 
+  filter(Età=="totale", 
+         `Stato civile`=="totale", 
+         Sesso=="totale", 
+         nchar(ITTER107)==5) %>% 
+  select(Territorio,Popolazione=Value)
+
+pop_prov
+
+```
+
+- mostrare un grafico a barre con le popolazioni delle diverse provincie
+
+```{r, fig.width=5,fig.height=10}
+## DA COMPLETARE
+
+ggplot(pop_prov,aes(y=fct_reorder(Territorio,Popolazione),x=Popolazione))+
+  geom_bar(stat="identity",fill="steelblue")+
+  geom_text(aes(label=format(Popolazione,big.mark = " "),color=Popolazione>2e6),hjust="inward",size=2)+
+  scale_x_continuous(labels=scales::label_number_si(),position="top")+
+  scale_color_manual(values=c("black","white"),guide="none")+
+  ylab("")+ggtitle("Popolazione delle provincie italiane","Aggiornata al 1/1/2021, in migliaia")+
+  theme_minimal()+theme(panel.grid.major.y = element_blank())
+
+```
+
+- Verificare la corrispondenza dei dati di popolazione con quelli di confini amministrativi:
+  - i dataframe hanno lo stesso numero di righe?
+  - i nomi nelle colonne `DEN_UTS` e `Territorio` sono gli stessi?
+  - se non lo sono: quali nomi `DEN_UTS` non hanno corrispondenza in `Territorio` e viceversa?
+    - sono quelli da modificare
+ 
+```{r}
+## DA COMPLETARE
+
+dim(prov)[1] == dim(pop_prov)[1]
+
+all( sort(prov$DEN_UTS) == sort(pop_prov$Territorio) )
+
+prov$DEN_UTS[ ! prov$DEN_UTS %in% pop_prov$Territorio ]
+# e viceversa
+pop_prov$Territorio[ ! pop_prov$Territorio  %in% prov$DEN_UTS ]
+
+```
+
+- correggere i nomi non corrispondenti in uno dei due dataframe  (e mostrare il dataframe)
+  - usare la funzione `str_replace_all()` a cui è possibile passare
+    un vettore di corrispondenze (es. `str_replace_all( col, c( "errato"="corretto"))` )
+
+```{r}
+## DA COMPLETARE
+
+pop_prov <- pop_prov %>% 
+  mutate(Territorio=str_replace_all(Territorio,c(   # corregge / sostituisce
+    "Valle d'Aosta / Vallée d'Aoste" = "Aosta",
+    "Bolzano / Bozen" = "Bolzano",
+    "Forlì-Cesena" = "Forli'-Cesena",
+    "Massa-Carrara" = "Massa Carrara"
+    )))
+
+pop_prov
+
+```
+
+
+### Mappa coropletica
+
+- Visualizzare la mappa coropletica delle popolazioni delle diverse province
+  - *Suggerimento:* combinare i due dataframe (shapefile e popolazione regionale)
+    tramite la funzione `inner_join(.. by="DEN_UTS"="Territorio")`
+  - Provare scale di colore personalizzate:
+    - `scale_fill_distiller()` ha come parametri `palette` e `direction`
+    - `scale_fill_viridis_c()` ha come parametri `option` e `direction`
+
+```{r, fig.width=6,fig.height=6}
+## DA COMPLETARE
+
+prov %>% inner_join(pop_prov, by=c("DEN_UTS"="Territorio")) %>% 
+ggplot(aes(fill=log10(Popolazione)))+
+  #scale_fill_viridis_c(option="C", labels=scales::label_number())+
+  scale_fill_distiller(direction=1,breaks=log10(c(1000,10000,100000,500000,1e6,2e6)),
+                       labels=function(x) round(10^x/1000), name="popolazione")+
+  geom_sf(color="gray20")+
+  theme_minimal()
+
+```
+
+- aggiungere alla mappa precedente un'annotazione testuale con la popolazione (in milioni) 
+  delle 4 province più popolose
+
+```{r,fig.width=10,fig.height=10}
+## DA COMPLETARE
+
+prov %>% inner_join(pop_prov, by=c("DEN_UTS"="Territorio")) %>% 
+ggplot(aes(fill=Popolazione))+
+  scale_fill_viridis_c(option="C", labels=scales::label_number())+
+  geom_sf()+
+  geom_sf_label(aes(label=paste0(SIGLA,": ",round(Popolazione/1000000,1),"M")),
+               data=~.x %>% filter(rank(-Popolazione)<=4),
+               color="black",fill="white",alpha=0.4) +
+  theme_minimal()
+
+```
+
+## Parte 2: Dashboard
+
+Partendo dai dati pubblicati nel file xlsx dall'Istituto Superio di Sanità sul monitoraggio COVID-19, ridisegnare i grafici della dashboard migliorandone i limiti.
+
+### Dati sui casi
+
+- leggere i dati dei casi a livello provinciale (foglio `casi_provincie`)  (e mostrare il dataframe)
+
+```{r}
+## DA COMPLETARE
+
+casi_provincie = read_xlsx(fileiss,"casi_provincie") %>% 
+             mutate(CASI_CUMULATIVI = as.numeric(CASI_CUMULATIVI)) %>% 
+             select(-iss_date)
+
+casi_provincie
+
+```
+
+### Mappe coropletiche
+
+- riportare in una mappa coropletica il numero di casi per provincia
+
+```{r,fig.width=5,fig.height=5}
+## DA COMPLETARE
+
+prov %>% inner_join(casi_provincie, by = "COD_PROV") %>% 
+  ggplot(aes(fill=CASI_CUMULATIVI))+
+  scale_fill_viridis_c(name="Casi",option="C", labels=scales::label_number())+
+  geom_sf()+
+  ggtitle("Casi cumulativi totali")+
+  theme_minimal()
+
+```
+
+- riportare in una mappa coropletica con l'incidenza, ovvero il numero di casi ogni 100 000 di abitanti per provincia
+  - *Suggerimento:* occorre combinare gli shape con i dati dei casi e quelli della popolazione
+
+```{r,fig.width=5,fig.height=5}
+## DA COMPLETARE
+
+prov %>% inner_join(casi_provincie, by = "COD_PROV") %>% 
+         inner_join(pop_prov, by=c("DEN_UTS"="Territorio")) %>% 
+         mutate(incidenza = CASI_CUMULATIVI / Popolazione * 100000) %>% 
+  ggplot(aes(fill=incidenza))+
+  scale_fill_viridis_c(name="Casi per 100 000\nabitanti",option="C", labels=scales::label_number())+
+  geom_sf()+
+  geom_sf_label(aes(label=paste0(SIGLA,": ",round(incidenza,0))),
+               data=~.x %>% filter(rank(-incidenza)<=5),
+               color="black",size=2) +
+  ggtitle("Casi cumulativi per 100 000 abitanti")+
+  theme_minimal()
+
+```
+
+- mostrare l'incidenza (casi per 100 000 abitanti) a livello regionale
+  - dati nello shapefile `Limiti01012021_g/Reg01012021_g/Reg01012021_g_WGS84.shp`
+
+```{r,fig.width=6,fig.height=6}
+## DA COMPLETARE
+
+regioni <- read_sf(shapes_regioni)
+
+casi_reg <- read_xlsx(fileiss,"casi_regioni") %>% 
+             mutate(CASI_CUMULATIVI = as.numeric(CASI_CUMULATIVI)) %>% 
+            mutate(DEN_REG=str_replace_all(NOME_NUTS2,c(
+     "Valle d'Aosta/Vallée d'Aoste"="Valle d'Aosta" ,
+     "Friuli-Venezia Giulia"="Friuli Venezia Giulia",
+     "Provincia Autonoma di Bolzano/Bozen"="Trentino-Alto Adige",
+     "Provincia Autonoma di Trento"="Trentino-Alto Adige"
+   ))) %>% group_by(DEN_REG) %>%
+  summarize(CASI_CUMULATIVI=sum(CASI_CUMULATIVI))
+
+pop_reg <- popolazione %>% 
+  filter(Età=="totale", 
+         `Stato civile`=="totale", 
+         Sesso=="totale", 
+         nchar(ITTER107)==4) %>% 
+   mutate(DEN_REG=str_replace_all(Territorio,c(
+     "Valle d'Aosta / Vallée d'Aoste"="Valle d'Aosta" ,
+     "Trentino Alto Adige / Südtirol"="Trentino-Alto Adige",
+     "Friuli-Venezia Giulia"="Friuli Venezia Giulia" 
+   )))%>% 
+  select(DEN_REG,Popolazione=Value)
+
+regioni %>% inner_join(casi_reg, by="DEN_REG") %>% 
+            inner_join(pop_reg, by="DEN_REG") %>% 
+           mutate(incidenza=CASI_CUMULATIVI/Popolazione*100000) %>% 
+  ggplot(aes(fill=incidenza))+
+    scale_fill_viridis_c(name="Casi",option="C", labels=scales::label_number())+
+    geom_sf()+
+    # geom_sf_text(aes(label=round(incidenza),color=incidenza))+
+    # scale_color_viridis_c(option="A",direction=-1,guide="none")+
+    geom_sf_label(aes(label=scales::label_number(1)( round(incidenza))),
+                  fill="white",alpha=0.5,size=3)+
+    ggtitle("Casi cumulativi COVID-19","Per 100 000 abitanti")+
+    theme_minimal()
+
+```
+
+### Andamento temporale
+
+- mostrare l'andamento temporale del numero di casi per prelievo/diagnosi e inizio sintomi
+  - i dati si trovano nei fogli `casi_prelievo_diagnosi` e `casi_inizio_sintomi`
+  - la media mobile può agevolare la lettura
+
+```{r,fig.width=6,fig.height=3}
+## DA COMPLETARE
+
+media_mobile <- function(v,n){
+  stopifnot(length(v)>=n)
+  res = rep(NA,floor((n-1)/2))
+  while(length(v) >= n){
+    res = c(res,mean(v[1:n]))
+    v=tail(v,-1)
+  }
+  res = c(res,rep(NA,floor(n/2)))
+  return( res )
+}
+
+covid_casi_data <- read_xlsx(fileiss,"casi_inizio_sintomi") %>% 
+             mutate(CASI = as.numeric(CASI)) %>% 
+             rename(SINTOMI = CASI) %>% 
+             inner_join(
+               read_xlsx(fileiss,"casi_prelievo_diagnosi")%>% 
+               mutate(CASI = as.numeric(CASI)) %>% 
+               rename(DIAGNOSI = CASI),
+               by =c("DATA_INIZIO_SINTOMI"="DATA_PRELIEVO_DIAGNOSI")
+             ) %>%
+            rename(Data = DATA_INIZIO_SINTOMI) %>% 
+            select(- starts_with("iss_date")) %>% 
+            mutate(Data = as.Date(Data,format="%d/%m/%Y")) %>% 
+            filter(! is.na(Data)) %>% 
+            pivot_longer(c("SINTOMI","DIAGNOSI"),names_to="Tipo",values_to="CASI") %>% 
+            group_by(Tipo) %>% arrange(Data) %>% 
+            mutate(CASI_MM=media_mobile(CASI,7)) %>% 
+            filter(!is.na(CASI_MM))
+
+ggplot(covid_casi_data,aes(x=Data,y=CASI_MM,color=Tipo,group=Tipo))+
+  geom_line()+
+  scale_color_brewer(type="qual",guide="none")+
+  geom_point(data=~.x %>% filter(Data==max(Data)))+
+  geom_text(aes(label=Tipo),data=~.x %>% filter(Data==max(Data)),
+            hjust="left",vjust="bottom",nudge_x = 3, show.legend = FALSE)+
+  geom_text(aes(label=round(CASI_MM)),data=~.x %>% filter(Data==max(Data)),
+            hjust="left",vjust="top",nudge_x = 3,nudge_y=-200,size=2,color="gray20")+
+  scale_x_date(expand=expansion(add=c(0,40)))+
+  ylab("Casi")+
+  ggtitle("Andamento dei casi","Per data di diagnosi o inizio sintomi, media mobile a 7gg")+
+  theme_minimal()
+
+```
+
+### Indicatori per fasce di età
+
+- mostrare la distribuzione di casi per fasce di età (dati nel foglio `sesso_eta`)
+
+```{r}
+## DA COMPLETARE
+
+covid_eta = read_xlsx(fileiss,"sesso_eta") %>% 
+      mutate(SESS=as_factor(SESSO),
+            AGE_GROUP = as_factor(AGE_GROUP),
+             DECEDUTI = as.numeric(DECEDUTI),
+             CASI_CUMULATIVI = as.numeric(CASI_CUMULATIVI)) %>% 
+      select(-iss_date) %>% 
+      filter(SESSO!="Non noto", AGE_GROUP!="Non noto") %>% 
+      group_by(AGE_GROUP) %>% 
+      summarise(DECEDUTI=sum(DECEDUTI),
+                CASI_CUMULATIVI=sum(CASI_CUMULATIVI)) %>% 
+      mutate(CFR = DECEDUTI / CASI_CUMULATIVI )
+
+casi <- ggplot(covid_eta,aes(y=AGE_GROUP,x=CASI_CUMULATIVI))+
+  geom_bar(stat="identity")+
+  geom_text(aes(label=paste0(CASI_CUMULATIVI%/%1000," mila ")),
+            hjust="right",color="white",size=2)+
+  scale_x_continuous(labels=scales::label_number())+
+  ggtitle("Casi per fasce di età")+ylab("")+xlab("")+
+  theme_minimal()+theme(panel.grid.major.y = element_blank())
+
+casi
+
+```
+
+- mostrare i decessi per fasce di età
+
+```{r}
+## DA COMPLETARE
+
+dec <- ggplot(covid_eta,aes(y=AGE_GROUP,x=DECEDUTI))+
+  geom_bar(stat="identity")+
+  geom_text(aes(label=DECEDUTI),
+            hjust="left",color="black",size=2)+
+  scale_x_continuous(labels=scales::label_number(),expand=expansion(mult=c(0,0.1)))+
+  ggtitle("Decessi per fasce di età")+ylab("")+xlab("")+
+  theme_minimal()+theme(panel.grid.major.y = element_blank())
+
+dec
+
+```
+
+
+- mostrare il Case Fatality Ratio (CFR), ovvero il rapporto tra i deceduti ed i casi cumulativi
+
+```{r}
+## DA COMPLETARE
+
+overall <- covid_eta %>% summarize(CFR=sum(DECEDUTI,na.rm=T)/sum(CASI_CUMULATIVI,na.rm=T)) # linea rossa
+                                   
+cfr <- ggplot(covid_eta,aes(y=AGE_GROUP,x=CFR))+
+  geom_bar(stat="identity")+
+  scale_x_continuous(labels=scales::label_percent())+
+  geom_vline(aes(xintercept=CFR),
+             data=overall,
+             color="red")+
+  annotate(geom="text",label=scales::percent(overall$CFR,0.01),x=overall$CFR,y="0-9",hjust="left",col="red")+
+  geom_text(aes(label=scales::percent(CFR,0.01),
+                color=CFR>0.05,hjust=ifelse(CFR>0.05,1,0)),size=2)+
+  scale_color_manual(values=c("black","white"),guide="none")+
+  ggtitle("Case Fatality Ratio","Decessi su casi di contagio")+ylab("")+xlab("")+
+  theme_minimal()+theme(panel.grid.major.y = element_blank())
+
+cfr
+
+```
+
+- mostrare il Tasso di Mortalità (MR), ovvero il rapporto tra i deceduti la popolazione, per fasce di età
+  - Suggerimento: occorre calcolare, a partire dai dati sulla popolazione, la popolazione totale 
+  per fasce di età; per fare questo è necessario costruire una tabella di corrispondenza tra i livelli 
+  della variabile `ETA1` nei dati di popolazione e quelli della variabile `AGE_GROUP` nei dati del 
+  foglio `sesso_eta` rimuovendo i totali e i dati non noti.
+  
+  Si può sfruttare la funzione `cut()` del package di base per costruirla:
+  ```
+  fasce = data.frame(
+      ETA1 = head( levels(popolazione$ETA1),-1),
+      AGE_GROUP = cut(0:100,breaks=c(0:10*10),include.lowest=TRUE,right=FALSE,
+                          labels=head(levels(covid_eta$AGE_GROUP),-1)))
+  ```
+  
+  dove `head(..,-1)` toglie l'ultimo valore che corrisponde ai Totali ed ai valori non noti.
+  
+```{r}
+## DA COMPLETARE
+
+fasce = data.frame(ETA1=head(levels(popolazione$ETA1),-1),
+           AGE_GROUP= cut(0:100,breaks=c(0:10*10),include.lowest=TRUE,right=FALSE,
+                          labels=head(levels(covid_eta$AGE_GROUP), -1)))
+
+pop_eta <- popolazione %>% 
+  filter(`Stato civile`=="totale", 
+         Sesso=="totale", 
+         nchar(ITTER107)==2) %>% 
+  select(ETA1,Popolazione=Value) %>% 
+  inner_join(fasce,by="ETA1") %>% 
+  group_by(AGE_GROUP) %>% 
+  summarize(Popolazione=sum(Popolazione))
+
+covid_eta <- covid_eta %>% inner_join(pop_eta,by="AGE_GROUP") %>% 
+  mutate(MR=DECEDUTI/Popolazione.y)
+
+MR_overall = sum(covid_eta$DECEDUTI,na.rm=TRUE)/sum(covid_eta$Popolazione,na.rm=TRUE)
+
+mr <- ggplot(covid_eta, aes(y=AGE_GROUP,x=MR))+
+  geom_bar(stat="identity")+
+  scale_x_continuous(labels=scales::label_percent())+
+  geom_vline(xintercept= MR_overall,color="red")+
+  annotate(geom="text",label=scales::percent(MR_overall,0.01),x=MR_overall,y="0-9",hjust="left",col="red")+
+  geom_text(aes(label=scales::percent(MR,0.01),
+                color=MR>0.01,hjust=ifelse(MR>0.01,1,0)),size=2)+
+  scale_color_manual(values=c("black","white"),guide="none")+
+  ggtitle("Mortality rate","Decessi su popolazione")+ylab("")+xlab("")+
+  theme_minimal()+theme(panel.grid.major.y = element_blank())
+
+mr
+
+```
+
+
+
+- Combinare i quattro diagrammi precedenti in uno solo
+
+```{r,fig.width=7,fig.height=6}
+## DA COMPLETARE
+
+library(patchwork)
+(casi+dec)/(cfr+mr)
+
+```
+
